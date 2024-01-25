@@ -1,0 +1,82 @@
+{
+  "name": "safe-next-navigation",
+  "version": "0.0.1",
+  "author": "Luke Morales <lukemorales@live.com>",
+  "description": "Type-safe navigation for NextJS App router",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukemorales/safe-next-navigation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lukemorales/safe-next-navigation/issues"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "run-p build:*",
+    "build:tsup": "tsup --dts --minify",
+    "changeset": "changeset",
+    "clean": "rimraf dist",
+    "dev": "bun run test:coverage --ui",
+    "lint": "run-p lint:*",
+    "lint:eslint": "eslint src --ext .ts",
+    "lint:eslint:fix": "bun run lint:eslint --fix",
+    "lint:format": "prettier --check \"src/**/*.ts\"",
+    "lint:format:fix": "bun run lint:format --write",
+    "lint:tsc": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest --passWithNoTests",
+    "test:ci": "bun run test:coverage --run",
+    "test:coverage": "bun run test --coverage"
+  },
+  "eslintConfig": {
+    "extends": [
+      "lukemorales/oss",
+      "lukemorales/jest"
+    ]
+  },
+  "prettier": "@lukemorales/prettier-config",
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.1",
+    "@lukemorales/prettier-config": "^1.1.0",
+    "@testing-library/react": "^14.2.0",
+    "@types/bun": "latest",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^1.2.2",
+    "@vitest/ui": "^1.2.2",
+    "eslint-config-lukemorales": "^0.3.0",
+    "jsdom": "^24.0.0",
+    "next": "^14.1.0",
+    "npm-run-all": "^4.1.5",
+    "tsup": "^8.0.1",
+    "typescript": "^4.8.2",
+    "vitest": "^1.2.2",
+    "zod": "^3.22.4"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.8.2",
+    "next": ">=13.0.0",
+    "zod": ">=3.20.0"
+  },
+  "keywords": [
+    "next",
+    "nextjs",
+    "next.js",
+    "next-js",
+    "app router",
+    "app-router",
+    "vercel",
+    "typescript",
+    "type-safety",
+    "router",
+    "navigation",
+    "zod",
+    "runtime validation",
+    "validation"
+  ]
+}
