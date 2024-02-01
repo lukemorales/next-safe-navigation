@@ -1,1 +1,1 @@
-export * from "./create-router-config";
+export { createNavigationConfig } from './create-navigation-config';
