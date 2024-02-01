@@ -1,5 +1,5 @@
 {
-  "name": "safe-next-navigation",
+  "name": "next-safe-navigation",
   "version": "0.0.1",
   "author": "Luke Morales <lukemorales@live.com>",
   "description": "Type-safe navigation for NextJS App router",
