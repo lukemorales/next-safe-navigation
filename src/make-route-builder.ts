@@ -21,7 +21,7 @@ export type RouteBuilder<
       getSchemas: () => { params: Params; search: never };
     }
   : [Params, Search] extends [never, z.ZodSchema] ?
-    Search extends z.ZodOptional<any> ?
+    undefined extends z.input<Search> ?
       {
         (options?: { search?: z.input<Search> }): string;
         getSchemas: () => { params: never; search: Search };
@@ -31,7 +31,7 @@ export type RouteBuilder<
         getSchemas: () => { params: never; search: Search };
       }
   : [Params, Search] extends [z.ZodSchema, z.ZodSchema] ?
-    Search extends z.ZodOptional<any> ?
+    undefined extends z.input<Search> ?
       {
         (options: z.input<Params> & { search?: z.input<Search> }): string;
         getSchemas: () => { params: Params; search: Search };

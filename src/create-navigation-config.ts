@@ -56,11 +56,11 @@ type SafeRoute<Params extends z.ZodSchema, Search extends z.ZodSchema> =
   [Params, Search] extends [never, never] ? SafeRootRoute
   : [Params, Search] extends [z.ZodSchema, never] ? SafeRouteWithParams<Params>
   : [Params, Search] extends [never, z.ZodSchema] ?
-    Search extends z.ZodOptional<any> ?
+    undefined extends z.input<Search> ?
       SafeRouteWithSearch<Search>
     : SafeRouteWithRequiredSearch<Search>
   : [Params, Search] extends [z.ZodSchema, z.ZodSchema] ?
-    Search extends z.ZodOptional<any> ?
+    undefined extends z.input<Search> ?
       SafeRouteWithParamsAndSearch<Params, Search>
     : SafeRouteWithParamsAndRequiredSearch<Params, Search>
   : never;
