@@ -1,4 +1,6 @@
+/* eslint-disable no-secrets/no-secrets */
 import { z } from 'zod';
+
 import { makeRouteBuilder } from './make-route-builder';
 
 describe('makeRouteBuilder', () => {
@@ -43,7 +45,7 @@ describe('makeRouteBuilder', () => {
           builder({
             search: { query: 'john doe', filters: ['active', 'is_admin'] },
           }),
-        ).toEqual(`/users?query=john+doe&filters=active&filters=is_admin`);
+        ).toBe(`/users?query=john+doe&filters=active&filters=is_admin`);
 
         expect(builder.getSchemas()).toEqual({
           params: undefined,
@@ -72,13 +74,13 @@ describe('makeRouteBuilder', () => {
           builder({
             search: { query: 'john doe', filters: ['active'] },
           }),
-        ).toEqual(`/users?query=john+doe&filters=active`);
+        ).toBe(`/users?query=john+doe&filters=active`);
 
         expect(
           builder({
             search: { query: 'john doe', filters: ['active', 'is_admin'] },
           }),
-        ).toEqual(`/users?query=john+doe&filters=active&filters=is_admin`);
+        ).toBe(`/users?query=john+doe&filters=active&filters=is_admin`);
 
         expect(builder.getSchemas()).toEqual({
           params: undefined,
@@ -91,7 +93,7 @@ describe('makeRouteBuilder', () => {
   describe('for a path with route params', () => {
     it('throws when no validation is not provided', () => {
       expect(() =>
-        //@ts-expect-error validation intentionally not provided
+        // @ts-expect-error validation intentionally not provided
         makeRouteBuilder('/organizations/[orgId]'),
       ).toThrowErrorMatchingInlineSnapshot(
         `[Error: Validation missing for path params: "/organizations/[orgId]"]`,
@@ -109,7 +111,7 @@ describe('makeRouteBuilder', () => {
         // @ts-expect-error no searchParams validation was defined
         builder({ orgId: 'org_123', search: {} });
 
-        expect(builder({ orgId: 'org_123' })).toEqual('/organizations/org_123');
+        expect(builder({ orgId: 'org_123' })).toBe('/organizations/org_123');
 
         expect(builder.getSchemas()).toEqual({
           params: expect.any(Object),
@@ -133,7 +135,7 @@ describe('makeRouteBuilder', () => {
         // @ts-expect-error no searchParams validation was defined
         builder({ orgId: 'org_123', userId: 'user_123', search: {} });
 
-        expect(builder({ orgId: 'org_123', userId: 'user_123' })).toEqual(
+        expect(builder({ orgId: 'org_123', userId: 'user_123' })).toBe(
           '/organizations/org_123/users/user_123',
         );
 
@@ -148,7 +150,7 @@ describe('makeRouteBuilder', () => {
   describe('for a path with route params and searchParams', () => {
     it('throws when no validation is not provided for the route params', () => {
       expect(() =>
-        //@ts-expect-error validation intentionally not provided
+        // @ts-expect-error validation intentionally not provided
         makeRouteBuilder('/organizations/[orgId]/users', {
           search: z.object({
             query: z.string().optional(),
@@ -184,14 +186,14 @@ describe('makeRouteBuilder', () => {
             orgId: 'org_123',
             search: { query: 'john doe', filters: ['active'] },
           }),
-        ).toEqual(`/organizations/org_123/users?query=john+doe&filters=active`);
+        ).toBe(`/organizations/org_123/users?query=john+doe&filters=active`);
 
         expect(
           builder({
             orgId: 'org_123',
             search: { query: 'john doe', filters: ['active', 'is_admin'] },
           }),
-        ).toEqual(
+        ).toBe(
           `/organizations/org_123/users?query=john+doe&filters=active&filters=is_admin`,
         );
 
@@ -221,21 +223,21 @@ describe('makeRouteBuilder', () => {
         expect(
           // no @ts-expect-error as search is optional
           builder({ orgId: 'org_123' }),
-        ).toEqual(`/organizations/org_123/users`);
+        ).toBe(`/organizations/org_123/users`);
 
         expect(
           builder({
             orgId: 'org_123',
             search: { query: 'john doe', filters: ['active'] },
           }),
-        ).toEqual(`/organizations/org_123/users?query=john+doe&filters=active`);
+        ).toBe(`/organizations/org_123/users?query=john+doe&filters=active`);
 
         expect(
           builder({
             orgId: 'org_123',
             search: { query: 'john doe', filters: ['active', 'is_admin'] },
           }),
-        ).toEqual(
+        ).toBe(
           `/organizations/org_123/users?query=john+doe&filters=active&filters=is_admin`,
         );
 
@@ -270,7 +272,7 @@ describe('makeRouteBuilder', () => {
             userId: 'user_123',
             search: { order: 'date' },
           }),
-        ).toEqual(`/organizations/org_123/users/user_123/logs?order=date`);
+        ).toBe(`/organizations/org_123/users/user_123/logs?order=date`);
 
         expect(builder.getSchemas()).toEqual({
           params: expect.any(Object),
@@ -310,7 +312,7 @@ describe('makeRouteBuilder', () => {
             userId: 'user_123',
             search: { order: 'date' },
           }),
-        ).toEqual(`/organizations/org_123/users/user_123/logs?order=date`);
+        ).toBe(`/organizations/org_123/users/user_123/logs?order=date`);
 
         expect(builder.getSchemas()).toEqual({
           params: expect.any(Object),

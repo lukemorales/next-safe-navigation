@@ -1,4 +1,5 @@
 import { type z } from 'zod';
+
 import { convertObjectToURLSearchParams } from './convert-object-to-url-search-params';
 import type { ExcludeAny } from './types';
 
@@ -10,8 +11,8 @@ type ExtractPathParams<T extends string> =
   : never;
 
 export type RouteBuilder<
-  Params extends z.ZodSchema = never,
-  Search extends z.ZodSchema = never,
+  Params extends z.ZodSchema,
+  Search extends z.ZodSchema,
 > =
   [Params, Search] extends [never, never] ?
     { (): string; getSchemas: () => { params: never; search: never } }

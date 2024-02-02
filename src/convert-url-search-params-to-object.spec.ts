@@ -1,4 +1,5 @@
 import type { ReadonlyURLSearchParams } from 'next/navigation';
+
 import { convertURLSearchParamsToObject } from './convert-url-search-params-to-object';
 
 describe('convertURLSearchParamsToObject', () => {

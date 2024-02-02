@@ -1,4 +1,4 @@
-export function suppressConsoleErrors(fn: () => void | Promise<void>) {
+export function suppressConsoleErrors(fn: () => void | Promise<void>): void {
   const { mockRestore } = vi
     .spyOn(console, 'error')
     .mockImplementation(() => null);
@@ -6,10 +6,10 @@ export function suppressConsoleErrors(fn: () => void | Promise<void>) {
   const test = fn();
 
   if (typeof test === 'object' && 'then' in test) {
-    return test.then(() => {
+    return void test.then(() => {
       mockRestore();
     });
   }
 
-  mockRestore();
+  return mockRestore();
 }

@@ -2,7 +2,9 @@ import {
   useParams as useNextParams,
   useSearchParams as useNextSearchParams,
 } from 'next/navigation';
-import { z } from 'zod';
+
+import { type z } from 'zod';
+
 import { convertURLSearchParamsToObject } from './convert-url-search-params-to-object';
 import { makeRouteBuilder, type RouteBuilder } from './make-route-builder';
 import type { Prettify } from './types';
@@ -152,7 +154,7 @@ export function createNavigationConfig<Config extends NavigationConfig>(
   for (const [route, builder] of Object.entries(navigationConfig)) {
     const schemas = builder.getSchemas();
 
-    //@ts-expect-error overwriting runtime implementation
+    // @ts-expect-error overwriting runtime implementation
     builder.getSchemas = undefined;
 
     if (schemas.params != null || schemas.search != null) {
