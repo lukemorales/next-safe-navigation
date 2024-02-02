@@ -69,7 +69,8 @@ type SafeRoute<Params extends z.ZodSchema, Search extends z.ZodSchema> =
 
 type RouteWithParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    RouteBuilder<infer Params, never> | RouteBuilder<infer Params, any>
+    | RouteBuilder<infer Params extends z.ZodSchema, never>
+    | RouteBuilder<infer Params extends z.ZodSchema, any>
   ) ?
     Params extends z.ZodSchema ?
       Route
@@ -79,7 +80,8 @@ type RouteWithParams<Config extends NavigationConfig> = {
 
 type RouteWithSearchParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    RouteBuilder<never, infer Search> | RouteBuilder<any, infer Search>
+    | RouteBuilder<never, infer Search extends z.ZodSchema>
+    | RouteBuilder<any, infer Search extends z.ZodSchema>
   ) ?
     Search extends z.ZodSchema ?
       Route
@@ -89,7 +91,10 @@ type RouteWithSearchParams<Config extends NavigationConfig> = {
 
 type SafeNavigation<Config extends NavigationConfig> = {
   [Route in keyof Config]: Config[Route] extends (
-    RouteBuilder<infer Params, infer Search>
+    RouteBuilder<
+      infer Params extends z.ZodSchema,
+      infer Search extends z.ZodSchema
+    >
   ) ?
     SafeRoute<Params, Search>
   : never;
@@ -103,7 +108,8 @@ type ValidatedRouteParams<
 > =
   Route extends keyof Pick<Router, AcceptableRoute & keyof Router> ?
     Router[Route] extends (
-      SafeRoute<infer Params, any> | SafeRoute<infer Params, never>
+      | SafeRoute<infer Params extends z.ZodSchema, any>
+      | SafeRoute<infer Params extends z.ZodSchema, never>
     ) ?
       z.output<Params>
     : never
@@ -117,7 +123,8 @@ type ValidatedRouteSearchParams<
 > =
   Route extends keyof Pick<Router, AcceptableRoute & keyof Router> ?
     Router[Route] extends (
-      SafeRoute<any, infer Search> | SafeRoute<never, infer Search>
+      | SafeRoute<any, infer Search extends z.ZodSchema>
+      | SafeRoute<never, infer Search extends z.ZodSchema>
     ) ?
       z.output<Search>
     : never
