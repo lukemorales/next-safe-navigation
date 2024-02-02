@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="https://github.com/lukemorales/next-safe-navigation/actions/workflows/tests.yml" target="\_parent"><img src="https://github.com/lukemorales/next-safe-navigation/actions/workflows/tests.yml/badge.svg?branch=main" alt="Latest build"></a>
+  <a href="https://codecov.io/gh/lukemorales/next-safe-navigation"><img src="https://codecov.io/gh/lukemorales/next-safe-navigation/graph/badge.svg?token=35GW5EJMFK"/></a>
   <a href="https://www.npmjs.com/package/next-safe-navigation" target="\_parent"><img src="https://badgen.net/npm/v/next-safe-navigation" alt="Latest published version"></a>
   <a href="https://bundlephobia.com/package/next-safe-navigation@latest" target="\_parent"><img src="https://badgen.net/bundlephobia/minzip/next-safe-navigation" alt="Bundlephobia"></a>
   <a href="https://bundlephobia.com/package/next-safe-navigation@latest" target="\_parent"><img src="https://badgen.net/bundlephobia/tree-shaking/next-safe-navigation" alt="Tree shaking available"></a>
@@ -193,4 +194,3 @@ export function CustomerInvoices({ invoices }) {
   )
 };
 ```
-<br />
