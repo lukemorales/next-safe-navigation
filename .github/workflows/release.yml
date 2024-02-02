@@ -6,13 +6,13 @@ on:
   push:
     branches:
       - main
-  # workflow_dispatch:
-  #   inputs:
-  #     forceGPR:
-  #       description: Force GPR release
-  #       type: boolean
-  #       required: false
-  #       default: false
+  workflow_dispatch:
+    inputs:
+      forceGPR:
+        description: Force GPR release
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   install-deps:
@@ -122,45 +122,49 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # gpr-release:
-  #   name: 🚀 Release to GitHub Package Manager
-  #   if: github.event.inputs.forceGPR == 'true' || needs.release.outputs.published == 'true'
-  #   runs-on: ubuntu-latest
-  #   needs: [build, release]
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #   steps:
-  #     - name: 🔑 Checkout Repository
-  #       uses: actions/checkout@v3
+  gpr-release:
+    name: 🚀 Release to GitHub Package Manager
+    if: github.event.inputs.forceGPR == 'true' || needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    needs: [build, release]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
 
-  #     - name: 🔧 Install PNPM
-  #       uses: pnpm/action-setup@v2.2.4
-  #       with:
-  #         version: 7
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
 
-  #     - name: ♻️ Load node_modules
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: "**/node_modules"
-  #         key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+      - name: ♻️ Load node_modules
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
 
-  #     - name: 🛠️ Setup Node for GPR
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '16.14.2'
-  #         check-latest: true
-  #         cache: 'pnpm'
-  #         registry-url: 'https://npm.pkg.github.com'
+      - name: 🛠️ Setup Node for GPR
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          check-latest: true
+          registry-url: 'https://npm.pkg.github.com'
 
-  #     - name: 📦 Install dependencies
-  #       if: steps.bun-cache.outputs.cache-hit != 'true'
-  #       run: bun install --frozen-lockfile
+      - name: 👤 Set git user
+        run: |
+          git config --global user.email "lukemorales@live.com"
+          git config --global user.name "Luke Morales"
 
-  #     - name: ⚒️ Build package
-  #       run: bun run build
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
 
-  #     - name: 🚀 Publish to GPR
-  #       run: pnpm publish
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: ⚒️ Build package
+        run: bun run build
+
+      - name: 🚀 Publish to GPR
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
