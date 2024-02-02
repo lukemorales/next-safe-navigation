@@ -162,7 +162,7 @@ jobs:
         if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
-      - name: ♼ Change package.json name
+      - name: 🏷️ Overwrite package name with user scope
         uses: sergeysova/jq-action@v2
         with:
           cmd: echo "$( jq '.name="@${{ github.repository }}"' package.json )" > package.json
