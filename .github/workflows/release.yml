@@ -101,7 +101,6 @@ jobs:
         with:
           node-version: latest
           check-latest: true
-          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
       - name: 👤 Set git user
