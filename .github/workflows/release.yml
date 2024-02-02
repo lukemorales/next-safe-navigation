@@ -1,0 +1,167 @@
+name: release to package managers
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  push:
+    branches:
+      - main
+  # workflow_dispatch:
+  #   inputs:
+  #     forceGPR:
+  #       description: Force GPR release
+  #       type: boolean
+  #       required: false
+  #       default: false
+
+jobs:
+  install-deps:
+    name: 📦 Install dependencies
+    if: github.repository == 'lukemorales/next-safe-navigation' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: ♻️ Cache node_modules
+        uses: actions/cache@v3
+        id: bun-cache
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+      - run: bun install --frozen-lockfile
+
+  build:
+    name: 🏗️ Build package
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: 🚨 Check for errors
+        run: bun run lint
+
+      - name: 🧪 Run tests
+        run: bun run test:ci
+
+      - name: ⚒️ Build package
+        run: bun run build
+
+  release:
+    name: 🚀 Release to NPM
+    if: github.event.inputs.forceGPR != 'true'
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: ♻️ Load node_modules
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+
+      - name: ♻️ Load build files
+        uses: actions/cache@v3
+        with:
+          path: "**/dist"
+          key: ${{ runner.os }}-build-${{ hashFiles('**/bun.lockb') }}
+
+      - name: 🛠️ Setup Node for NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          check-latest: true
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 👤 Set git user
+        run: |
+          git config --global user.email "lukemorales@live.com"
+          git config --global user.name "Luke Morales"
+
+      - name: 🚀 Create Changesets Pull Request or Publish to NPM
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          setupGitUser: false
+          title: "chore(changesets): bump package version"
+          commit: "chore: bump package version"
+          version: node .github/changeset-version.js
+          publish: bun run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # gpr-release:
+  #   name: 🚀 Release to GitHub Package Manager
+  #   if: github.event.inputs.forceGPR == 'true' || needs.release.outputs.published == 'true'
+  #   runs-on: ubuntu-latest
+  #   needs: [build, release]
+  #   permissions:
+  #     contents: read
+  #     packages: write
+  #   steps:
+  #     - name: 🔑 Checkout Repository
+  #       uses: actions/checkout@v3
+
+  #     - name: 🔧 Install PNPM
+  #       uses: pnpm/action-setup@v2.2.4
+  #       with:
+  #         version: 7
+
+  #     - name: ♻️ Load node_modules
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: "**/node_modules"
+  #         key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+
+  #     - name: 🛠️ Setup Node for GPR
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '16.14.2'
+  #         check-latest: true
+  #         cache: 'pnpm'
+  #         registry-url: 'https://npm.pkg.github.com'
+
+  #     - name: 📦 Install dependencies
+  #       if: steps.bun-cache.outputs.cache-hit != 'true'
+  #       run: bun install --frozen-lockfile
+
+  #     - name: ⚒️ Build package
+  #       run: bun run build
+
+  #     - name: 🚀 Publish to GPR
+  #       run: pnpm publish
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

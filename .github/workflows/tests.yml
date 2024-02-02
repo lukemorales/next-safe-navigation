@@ -1,0 +1,83 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  install-deps:
+    runs-on: ubuntu-latest
+    name: 📦 Install dependencies
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: ♻️ Cache node_modules
+        uses: actions/cache@v3
+        id: bun-cache
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+      - run: bun install --frozen-lockfile
+
+  tests:
+    name: 🧪 Test package
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: ♻️ Load node_modules
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: 🧪 Run tests
+        run: bun run test:ci
+
+  build:
+    name: 🏗️ Build package
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - name: 🔑 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: ♻️ Load node_modules
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
+
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: 🏗️ Build package
+        run: bun run build
