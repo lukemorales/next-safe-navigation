@@ -16,15 +16,15 @@ jobs:
     name: 📦 Install dependencies
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: bun-cache
         with:
           path: "**/node_modules"
@@ -41,21 +41,21 @@ jobs:
     needs: install-deps
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Restore node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
 
       - name: ♻️ Restore ESLint Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: eslint-cache
         with:
           path: .eslintcache
@@ -74,15 +74,15 @@ jobs:
     needs: install-deps
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Restore node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
@@ -105,15 +105,15 @@ jobs:
     needs: install-deps
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Load node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}

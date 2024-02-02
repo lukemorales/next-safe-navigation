@@ -8,7 +8,7 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      forceGPR:
+      force_github_package_release:
         description: Force GPR release
         type: boolean
         required: false
@@ -21,15 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: bun-cache
         with:
           path: "**/node_modules"
@@ -46,12 +46,12 @@ jobs:
     needs: install-deps
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: 📦 Install dependencies
         if: steps.bun-cache.outputs.cache-hit != 'true'
@@ -68,30 +68,30 @@ jobs:
 
   release:
     name: 🚀 Release to NPM
-    if: github.event.inputs.forceGPR != 'true'
+    if: github.event.inputs.force_github_package_release != 'true'
     runs-on: ubuntu-latest
     needs: build
     outputs:
       published: ${{ steps.changesets.outputs.published }}
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Load node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
 
       - name: ♻️ Load build files
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/dist"
           key: ${{ runner.os }}-build-${{ hashFiles('**/bun.lockb') }}
@@ -124,7 +124,7 @@ jobs:
 
   gpr-release:
     name: 🚀 Release to GitHub Package Manager
-    if: github.event.inputs.forceGPR == 'true' || needs.release.outputs.published == 'true'
+    if: ${{ github.event.inputs.force_github_package_release != 'true' || needs.release.outputs.published == 'true' }}
     runs-on: ubuntu-latest
     needs: [build, release]
     permissions:
@@ -132,15 +132,15 @@ jobs:
       packages: write
     steps:
       - name: 🔑 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: ♻️ Load node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
