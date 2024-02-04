@@ -101,10 +101,8 @@ export function makeRouteBuilder(
   path: PathBlueprint,
   schemas?: { params?: z.ZodSchema; search?: z.ZodSchema },
 ): any {
-  let basePath: string = path;
-
   if (!path.startsWith('/')) {
-    basePath = `/${path}`;
+    path = `/${path}`;
   }
 
   const hasParamsInPath = /\[\w+\]/g.test(path);
@@ -115,6 +113,8 @@ export function makeRouteBuilder(
   }
 
   const routeBuilder: RouteBuilder<any, any> = (options) => {
+    let basePath: string = path;
+
     const { search = {}, ...params } = options ?? {};
 
     for (const [param, value] of Object.entries(params)) {

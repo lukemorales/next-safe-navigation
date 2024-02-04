@@ -145,6 +145,22 @@ describe('makeRouteBuilder', () => {
         });
       });
     });
+
+    describe('when the builder is called multiple times', () => {
+      it('replaces correctly the path params with the latest value', () => {
+        const builder = makeRouteBuilder('/organizations/[orgId]', {
+          params: z.object({
+            orgId: z.string(),
+          }),
+        });
+
+        expect(builder({ orgId: 'org_123' })).toBe('/organizations/org_123');
+
+        expect(builder({ orgId: 'org_456' })).toBe('/organizations/org_456');
+
+        expect(builder({ orgId: 'org_789' })).toBe('/organizations/org_789');
+      });
+    });
   });
 
   describe('for a path with route params and searchParams', () => {
