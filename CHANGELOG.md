@@ -1,5 +1,11 @@
 # next-safe-navigation
 
+## 0.1.1
+
+### Patch Changes
+
+- [`be00799`](https://github.com/lukemorales/next-safe-navigation/commit/be00799e9befbfd6fee464a3a76266c3fd1599d9) Thanks [@lukemorales](https://github.com/lukemorales)! - Fix route builder closure mutating same path string
+
 ## 0.1.0
 
 ### Minor Changes
