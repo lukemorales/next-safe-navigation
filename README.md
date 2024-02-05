@@ -34,7 +34,7 @@ npm install next-safe-navigation
 ## ⚡ Quick start
 
 > [!WARNING]
-> Ensure `experimental.typedRoutes` is not enabled in `next.config.js`
+> Ensure `experimental.typedRoutes` is disabled in `next.config.js`
 
 ### Declare your application routes and parameters in a single place
 ```ts
