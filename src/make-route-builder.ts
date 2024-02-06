@@ -71,6 +71,8 @@ type RouteBuilderResult<
     RouteBuilder<Params, Search>
   : never;
 
+const PATH_PARAM_REGEX = /\[([^[\]]+)]/g;
+
 // @ts-expect-error overload signature does match the implementation,
 // the compiler complains about EnsurePathWithNoParams, but it is fine
 export function makeRouteBuilder<Path extends PathBlueprint>(
@@ -113,13 +115,12 @@ export function makeRouteBuilder(
   }
 
   const routeBuilder: RouteBuilder<any, any> = (options) => {
-    let basePath: string = path;
-
     const { search = {}, ...params } = options ?? {};
 
-    for (const [param, value] of Object.entries(params)) {
-      basePath = basePath.replace(`[${param}]`, `${value}`);
-    }
+    const basePath = path.replace(
+      PATH_PARAM_REGEX,
+      (match, param) => params[param] ?? match,
+    );
 
     const urlSearchParams = convertObjectToURLSearchParams(search);
 
