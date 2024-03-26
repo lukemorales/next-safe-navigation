@@ -6,7 +6,11 @@ import type { ExcludeAny } from './types';
 type PathBlueprint = `/${string}`;
 
 type ExtractPathParams<T extends string> =
-  T extends `${string}[${infer Param}]${infer Rest}` ?
+  T extends `${string}[[...${infer Param}]]${infer Rest}` ?
+    Param | ExtractPathParams<Rest>
+  : T extends `${string}[...${infer Param}]${infer Rest}` ?
+    Param | ExtractPathParams<Rest>
+  : T extends `${string}[${infer Param}]${infer Rest}` ?
     Param | ExtractPathParams<Rest>
   : never;
 
@@ -71,7 +75,8 @@ type RouteBuilderResult<
     RouteBuilder<Params, Search>
   : never;
 
-const PATH_PARAM_REGEX = /\[([^[\]]+)]/g;
+const PATH_PARAM_REGEX = /\[{1,2}([^[\]]+)]{1,2}/g;
+const REMOVE_PARAM_NOTATION_REGEX = /[^[.].+[^\]]/;
 
 // @ts-expect-error overload signature does match the implementation,
 // the compiler complains about EnsurePathWithNoParams, but it is fine
@@ -107,7 +112,7 @@ export function makeRouteBuilder(
     path = `/${path}`;
   }
 
-  const hasParamsInPath = /\[\w+\]/g.test(path);
+  const hasParamsInPath = PATH_PARAM_REGEX.test(path);
   const isMissingParamsValidation = hasParamsInPath && !schemas?.params;
 
   if (isMissingParamsValidation) {
@@ -117,10 +122,17 @@ export function makeRouteBuilder(
   const routeBuilder: RouteBuilder<any, any> = (options) => {
     const { search = {}, ...params } = options ?? {};
 
-    const basePath = path.replace(
-      PATH_PARAM_REGEX,
-      (match, param) => params[param] ?? match,
-    );
+    const basePath = path.replace(PATH_PARAM_REGEX, (match, param: string) => {
+      const sanitizedParam = REMOVE_PARAM_NOTATION_REGEX.exec(param)?.[0];
+
+      const value = params[sanitizedParam ?? param];
+
+      if (Array.isArray(value)) {
+        return value.join('/');
+      }
+
+      return value ?? match;
+    });
 
     const urlSearchParams = convertObjectToURLSearchParams(search);
 
