@@ -5,6 +5,8 @@ import type { ExcludeAny } from './types';
 
 type PathBlueprint = `/${string}`;
 
+type SearchTemplate = `?${string}`;
+
 type ExtractPathParams<T extends string> =
   T extends `${string}[[...${infer Param}]]${infer Rest}` ?
     Param | ExtractPathParams<Rest>
@@ -15,34 +17,41 @@ type ExtractPathParams<T extends string> =
   : never;
 
 export type RouteBuilder<
+  Path extends string,
   Params extends z.ZodSchema,
   Search extends z.ZodSchema,
 > =
   [Params, Search] extends [never, never] ?
-    { (): string; getSchemas: () => { params: never; search: never } }
+    { (): Path; getSchemas: () => { params: never; search: never } }
   : [Params, Search] extends [z.ZodSchema, never] ?
     {
-      (options: z.input<Params>): string;
+      (options: z.input<Params>): Path;
       getSchemas: () => { params: Params; search: never };
     }
   : [Params, Search] extends [never, z.ZodSchema] ?
     undefined extends z.input<Search> ?
       {
-        (options?: { search?: z.input<Search> }): string;
+        (options?: {
+          search?: z.input<Search>;
+        }): Path | `${Path}${SearchTemplate}`;
         getSchemas: () => { params: never; search: Search };
       }
     : {
-        (options: { search: z.input<Search> }): string;
+        (options: { search: z.input<Search> }): `${Path}${SearchTemplate}`;
         getSchemas: () => { params: never; search: Search };
       }
   : [Params, Search] extends [z.ZodSchema, z.ZodSchema] ?
     undefined extends z.input<Search> ?
       {
-        (options: z.input<Params> & { search?: z.input<Search> }): string;
+        (
+          options: z.input<Params> & { search?: z.input<Search> },
+        ): Path | `${Path}${SearchTemplate}`;
         getSchemas: () => { params: Params; search: Search };
       }
     : {
-        (options: z.input<Params> & { search: z.input<Search> }): string;
+        (
+          options: z.input<Params> & { search: z.input<Search> },
+        ): `${Path}${SearchTemplate}`;
         getSchemas: () => { params: Params; search: Search };
       }
   : never;
@@ -64,15 +73,17 @@ type StrictParams<Schema extends z.ZodSchema, Keys extends string> =
   : never;
 
 type RouteBuilderResult<
+  Path extends string,
   PathParams extends string,
   Params extends z.ZodObject<any>,
   Search extends z.ZodSchema,
 > =
-  [PathParams, Search] extends [string, never] ? RouteBuilder<Params, never>
+  [PathParams, Search] extends [string, never] ?
+    RouteBuilder<Path, Params, never>
   : [PathParams, Search] extends [never, z.ZodSchema] ?
-    RouteBuilder<never, Search>
+    RouteBuilder<Path, never, Search>
   : [PathParams, Search] extends [string, z.ZodSchema] ?
-    RouteBuilder<Params, Search>
+    RouteBuilder<Path, Params, Search>
   : never;
 
 const PATH_PARAM_REGEX = /\[{1,2}([^[\]]+)]{1,2}/g;
@@ -95,7 +106,7 @@ const REMOVE_PARAM_NOTATION_REGEX = /[^[.].+[^\]]/;
 // the compiler complains about EnsurePathWithNoParams, but it is fine
 export function makeRouteBuilder<Path extends PathBlueprint>(
   path: EnsurePathWithNoParams<Path>,
-): RouteBuilder<never, never>;
+): RouteBuilder<Path, never, never>;
 
 export function makeRouteBuilder<
   Path extends PathBlueprint,
@@ -112,6 +123,7 @@ export function makeRouteBuilder<
       search?: Search | z.ZodOptional<z.ZodSchema>;
     },
 ): RouteBuilderResult<
+  Path,
   ExtractPathParams<Path>,
   ExcludeAny<Params>,
   ExcludeAny<Search>
@@ -132,7 +144,7 @@ export function makeRouteBuilder(
     throw new Error(`Validation missing for path params: "${path}"`);
   }
 
-  const routeBuilder: RouteBuilder<any, any> = (options) => {
+  const routeBuilder: RouteBuilder<string, any, any> = (options) => {
     const { search = {}, ...params } = options ?? {};
 
     const basePath = path.replace(PATH_PARAM_REGEX, (match, param: string) => {

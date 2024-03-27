@@ -10,67 +10,77 @@ import { makeRouteBuilder, type RouteBuilder } from './make-route-builder';
 import type { Prettify } from './types';
 
 type AnyRouteBuilder =
-  | RouteBuilder<any, any>
-  | RouteBuilder<any, never>
-  | RouteBuilder<never, any>
-  | RouteBuilder<never, never>;
+  | RouteBuilder<string, any, any>
+  | RouteBuilder<string, any, never>
+  | RouteBuilder<string, never, any>
+  | RouteBuilder<string, never, never>;
 
 type NavigationConfig = Record<string, AnyRouteBuilder>;
 
-type SafeRootRoute = () => string;
+type SafeRootRoute<Path extends string> = () => Path;
 
-type SafeRouteWithParams<Params extends z.ZodSchema> = {
-  (options: z.input<Params>): string;
+type SafeRouteWithParams<Path extends string, Params extends z.ZodSchema> = {
+  (options: z.input<Params>): Path;
   $parseParams: (params: unknown) => z.output<Params>;
 };
 
-type SafeRouteWithSearch<Search extends z.ZodSchema> = {
-  (options?: { search?: z.input<Search> }): string;
+type SafeRouteWithSearch<Path extends string, Search extends z.ZodSchema> = {
+  (options?: { search?: z.input<Search> }): Path;
   $parseSearchParams: (searchParams: unknown) => z.output<Search>;
 };
 
-type SafeRouteWithRequiredSearch<Search extends z.ZodSchema> = {
-  (options: { search: z.input<Search> }): string;
+type SafeRouteWithRequiredSearch<
+  Path extends string,
+  Search extends z.ZodSchema,
+> = {
+  (options: { search: z.input<Search> }): Path;
   $parseSearchParams: (searchParams: unknown) => z.output<Search>;
 };
 
 type SafeRouteWithParamsAndSearch<
+  Path extends string,
   Params extends z.ZodSchema,
   Search extends z.ZodSchema,
   Options = z.input<Params> & { search?: z.input<Search> },
 > = {
-  (options: Prettify<Options>): string;
+  (options: Prettify<Options>): Path;
   $parseParams: (params: unknown) => z.output<Params>;
   $parseSearchParams: (searchParams: unknown) => z.output<Search>;
 };
 
 type SafeRouteWithParamsAndRequiredSearch<
+  Path extends string,
   Params extends z.ZodSchema,
   Search extends z.ZodSchema,
   Options = z.input<Params> & { search: z.input<Search> },
 > = {
-  (options: Prettify<Options>): string;
+  (options: Prettify<Options>): Path;
   $parseParams: (params: unknown) => z.output<Params>;
   $parseSearchParams: (searchParams: unknown) => z.output<Search>;
 };
 
-type SafeRoute<Params extends z.ZodSchema, Search extends z.ZodSchema> =
-  [Params, Search] extends [never, never] ? SafeRootRoute
-  : [Params, Search] extends [z.ZodSchema, never] ? SafeRouteWithParams<Params>
+type SafeRoute<
+  Path extends string,
+  Params extends z.ZodSchema,
+  Search extends z.ZodSchema,
+> =
+  [Params, Search] extends [never, never] ? SafeRootRoute<Path>
+  : [Params, Search] extends [z.ZodSchema, never] ?
+    SafeRouteWithParams<Path, Params>
   : [Params, Search] extends [never, z.ZodSchema] ?
     undefined extends z.input<Search> ?
-      SafeRouteWithSearch<Search>
-    : SafeRouteWithRequiredSearch<Search>
+      SafeRouteWithSearch<Path, Search>
+    : SafeRouteWithRequiredSearch<Path, Search>
   : [Params, Search] extends [z.ZodSchema, z.ZodSchema] ?
     undefined extends z.input<Search> ?
-      SafeRouteWithParamsAndSearch<Params, Search>
-    : SafeRouteWithParamsAndRequiredSearch<Params, Search>
+      SafeRouteWithParamsAndSearch<Path, Params, Search>
+    : SafeRouteWithParamsAndRequiredSearch<Path, Params, Search>
   : never;
 
 type RouteWithParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    | RouteBuilder<infer Params extends z.ZodSchema, never>
-    | RouteBuilder<infer Params extends z.ZodSchema, any>
+    | RouteBuilder<string, infer Params extends z.ZodSchema, never>
+    | RouteBuilder<string, infer Params extends z.ZodSchema, any>
   ) ?
     Params extends z.ZodSchema ?
       Route
@@ -80,8 +90,8 @@ type RouteWithParams<Config extends NavigationConfig> = {
 
 type RouteWithSearchParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    | RouteBuilder<never, infer Search extends z.ZodSchema>
-    | RouteBuilder<any, infer Search extends z.ZodSchema>
+    | RouteBuilder<string, never, infer Search extends z.ZodSchema>
+    | RouteBuilder<string, any, infer Search extends z.ZodSchema>
   ) ?
     Search extends z.ZodSchema ?
       Route
@@ -92,11 +102,12 @@ type RouteWithSearchParams<Config extends NavigationConfig> = {
 type SafeNavigation<Config extends NavigationConfig> = {
   [Route in keyof Config]: Config[Route] extends (
     RouteBuilder<
+      infer Path extends string,
       infer Params extends z.ZodSchema,
       infer Search extends z.ZodSchema
     >
   ) ?
-    SafeRoute<Params, Search>
+    SafeRoute<Path, Params, Search>
   : never;
 };
 
@@ -108,8 +119,8 @@ type ValidatedRouteParams<
 > =
   Route extends keyof Pick<Router, AcceptableRoute & keyof Router> ?
     Router[Route] extends (
-      | SafeRoute<infer Params extends z.ZodSchema, any>
-      | SafeRoute<infer Params extends z.ZodSchema, never>
+      | SafeRoute<string, infer Params extends z.ZodSchema, any>
+      | SafeRoute<string, infer Params extends z.ZodSchema, never>
     ) ?
       z.output<Params>
     : never
@@ -123,8 +134,8 @@ type ValidatedRouteSearchParams<
 > =
   Route extends keyof Pick<Router, AcceptableRoute & keyof Router> ?
     Router[Route] extends (
-      | SafeRoute<any, infer Search extends z.ZodSchema>
-      | SafeRoute<never, infer Search extends z.ZodSchema>
+      | SafeRoute<string, any, infer Search extends z.ZodSchema>
+      | SafeRoute<string, never, infer Search extends z.ZodSchema>
     ) ?
       z.output<Search>
     : never
