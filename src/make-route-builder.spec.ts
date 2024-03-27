@@ -161,6 +161,50 @@ describe('makeRouteBuilder', () => {
         expect(builder({ orgId: 'org_789' })).toBe('/organizations/org_789');
       });
     });
+
+    describe('when path has catch-all params', () => {
+      it('creates a builder that replaces the path param with its value', () => {
+        const builder = makeRouteBuilder('/[...catch_all]', {
+          params: z.object({
+            catch_all: z.array(z.string()),
+          }),
+        });
+
+        // @ts-expect-error no searchParams validation was defined
+        builder({ catch_all: ['channels'], search: {} });
+
+        expect(builder({ catch_all: ['channels', 'channel_123'] })).toBe(
+          '/channels/channel_123',
+        );
+
+        expect(builder.getSchemas()).toEqual({
+          params: expect.any(Object),
+          search: undefined,
+        });
+      });
+    });
+
+    describe('when path has optional catch-all params', () => {
+      it('creates a builder that replaces the path param with its value', () => {
+        const builder = makeRouteBuilder('/[[...catch_all]]', {
+          params: z.object({
+            catch_all: z.array(z.string()).default([]),
+          }),
+        });
+
+        // @ts-expect-error no searchParams validation was defined
+        builder({ catch_all: ['channels'], search: {} });
+
+        expect(builder({ catch_all: ['channels', 'channel_123'] })).toBe(
+          '/channels/channel_123',
+        );
+
+        expect(builder.getSchemas()).toEqual({
+          params: expect.any(Object),
+          search: undefined,
+        });
+      });
+    });
   });
 
   describe('for a path with route params and searchParams', () => {

@@ -58,6 +58,18 @@ export const { routes, useSafeParams, useSafeSearchParams } = createNavigationCo
         invoiceId: z.string(),
       }),
     }),
+    shop: defineRoute('/support/[...tickets]', {
+      params: z.object({
+        tickets: z.array(z.string()),
+      }),
+    }),
+    shop: defineRoute('/shop/[[...slug]]', {
+      params: z.object({
+        // ⚠️ Remember to always set your optional catch-all segments
+        // as optional values, or add a default value to them
+        slug: z.array(z.string()).optional(),
+      }),
+    }),
   }),
 );
 ```
