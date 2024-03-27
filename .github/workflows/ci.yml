@@ -92,7 +92,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: 🧪 Run tests
-        run: pnpm run test:ci
+        run: bun run test:ci
 
       - name: ⬆️ Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
