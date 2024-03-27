@@ -188,7 +188,7 @@ describe('makeRouteBuilder', () => {
       it('creates a builder that replaces the path param with its value', () => {
         const builder = makeRouteBuilder('/[[...catch_all]]', {
           params: z.object({
-            catch_all: z.array(z.string()),
+            catch_all: z.array(z.string()).default([]),
           }),
         });
 

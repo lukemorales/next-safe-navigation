@@ -76,6 +76,19 @@ type RouteBuilderResult<
   : never;
 
 const PATH_PARAM_REGEX = /\[{1,2}([^[\]]+)]{1,2}/g;
+
+/**
+ * Remove param notation from string to only get the param name when it is a catch-all segment
+ *
+ * @example
+ * ```ts
+ * '/shop/[[...slug]]'.replace(PATH_PARAM_REGEX, (match, param) => {
+ *   //                                                    ^? '[[...slug]]'
+ *   const [sanitizedParam] = REMOVE_PARAM_NOTATION_REGEX.exec(param)
+ *   //          ^? 'slug'
+ * })
+ * ```
+ */
 const REMOVE_PARAM_NOTATION_REGEX = /[^[.].+[^\]]/;
 
 // @ts-expect-error overload signature does match the implementation,
