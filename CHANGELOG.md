@@ -1,5 +1,15 @@
 # next-safe-navigation
 
+## 0.2.0
+
+### Minor Changes
+
+- [#14](https://github.com/lukemorales/next-safe-navigation/pull/14) [`fc55e1d`](https://github.com/lukemorales/next-safe-navigation/commit/fc55e1dff699c331d7e3517e41161473d7da08d1) Thanks [@lukemorales](https://github.com/lukemorales)! - Add better support for Catch-all Segments
+
+### Patch Changes
+
+- [`a5194b3`](https://github.com/lukemorales/next-safe-navigation/commit/a5194b31b7e2708c4e4f20ac4d79f55d29cda705) Thanks [@lukemorales](https://github.com/lukemorales)! - Use regex instead of for loop to replace path params
+
 ## 0.1.1
 
 ### Patch Changes
