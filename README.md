@@ -33,8 +33,8 @@ npm install next-safe-navigation
 
 ## ⚡ Quick start
 
-> [!WARNING]
-> Ensure `experimental.typedRoutes` is disabled in `next.config.js`
+> [!TIP]
+> Enable `experimental.typedRoutes` in `next.config.js` for a better and safer experience with autocomplete when defining your routes
 
 ### Declare your application routes and parameters in a single place
 ```ts
