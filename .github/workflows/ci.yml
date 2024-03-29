@@ -32,7 +32,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-        if: steps.cache.outputs.cache-hit != 'true'
       - run: bun install --frozen-lockfile
 
   lint-package:
