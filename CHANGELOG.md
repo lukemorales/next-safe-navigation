@@ -1,5 +1,13 @@
 # next-safe-navigation
 
+## 0.3.0
+
+### Minor Changes
+
+- [#15](https://github.com/lukemorales/next-safe-navigation/pull/15) [`31d794e`](https://github.com/lukemorales/next-safe-navigation/commit/31d794ed599e14596591f9874874c8446151528a) Thanks [@lukemorales](https://github.com/lukemorales)! - Add support for `experimental.typedRoutes`
+
+  You may now enable `experimental.typedRoutes` in `next.config.js` to have a better and safer experience with autocomplete when defining your routes
+
 ## 0.2.0
 
 ### Minor Changes
