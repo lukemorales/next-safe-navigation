@@ -1,4 +1,3 @@
-/* eslint-disable no-secrets/no-secrets */
 import { z } from 'zod';
 
 import { makeRouteBuilder } from './make-route-builder';
