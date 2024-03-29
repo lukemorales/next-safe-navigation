@@ -34,10 +34,7 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
 
-        if: steps.cache.outputs.cache-hit != 'true'
       - run: bun install --frozen-lockfile
 
   build:
