@@ -11,5 +11,5 @@ export function suppressConsoleErrors(fn: () => void | Promise<void>): void {
     });
   }
 
-  return mockRestore();
+  mockRestore();
 }

@@ -12,6 +12,7 @@ export function convertURLSearchParamsToObject(
       const values = params.getAll(key);
 
       acc[key] = values.length > 1 ? values : value;
+
       return acc;
     },
     {},
