@@ -20,14 +20,14 @@ jobs:
 
       - name: ♻️ Cache node_modules
         uses: actions/cache@v4
-        id: bun-cache
+        id: cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
-        if: steps.bun-cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
       - run: bun install --frozen-lockfile
 
   tests:
@@ -50,7 +50,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
 
       - name: 📦 Install dependencies
-        if: steps.bun-cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: 🧪 Run tests
@@ -81,7 +81,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/bun.lockb') }}
 
       - name: 📦 Install dependencies
-        if: steps.bun-cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: 🏗️ Build package
