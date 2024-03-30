@@ -79,8 +79,7 @@ type SafeRoute<
 
 type RouteWithParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    | RouteBuilder<string, infer Params extends z.ZodSchema, never>
-    | RouteBuilder<string, infer Params extends z.ZodSchema, any>
+    RouteBuilder<string, infer Params extends z.ZodSchema, infer _>
   ) ?
     Params extends z.ZodSchema ?
       Route
@@ -90,8 +89,11 @@ type RouteWithParams<Config extends NavigationConfig> = {
 
 type RouteWithSearchParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    | RouteBuilder<string, never, infer Search extends z.ZodSchema>
-    | RouteBuilder<string, any, infer Search extends z.ZodSchema>
+    RouteBuilder<
+      string,
+      infer _ extends z.ZodSchema,
+      infer Search extends z.ZodSchema
+    >
   ) ?
     Search extends z.ZodSchema ?
       Route
