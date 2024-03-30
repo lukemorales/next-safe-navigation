@@ -1,6 +1,6 @@
 {
   "name": "next-safe-navigation",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Luke Morales <lukemorales@live.com>",
   "description": "Type-safe navigation for NextJS App router",
   "license": "MIT",
