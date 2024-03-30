@@ -1,5 +1,11 @@
 # next-safe-navigation
 
+## 0.3.1
+
+### Patch Changes
+
+- [`4f0e3a5`](https://github.com/lukemorales/next-safe-navigation/commit/4f0e3a50bd6f56447d80e59885cc5a2496efa3fb) Thanks [@lukemorales](https://github.com/lukemorales)! - Fix type definition for `useSafeParams` when route has both `params` and `searchParams` defined
+
 ## 0.3.0
 
 ### Minor Changes
