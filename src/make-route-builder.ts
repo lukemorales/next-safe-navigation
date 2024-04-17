@@ -173,7 +173,7 @@ export function makeRouteBuilder(
 
     const urlSearchParams = convertObjectToURLSearchParams(search);
 
-    if (urlSearchParams.size) {
+    if (!urlSearchParams.entries().next().done) {
       return [basePath, urlSearchParams.toString()].join('?');
     }
 
