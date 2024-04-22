@@ -1,5 +1,11 @@
 # next-safe-navigation
 
+## 0.3.2
+
+### Patch Changes
+
+- [`a953425`](https://github.com/lukemorales/next-safe-navigation/commit/a9534250a8d3b820f91249ce7384954dcd95943c) Thanks [@lukemorales](https://github.com/lukemorales)! - Use iterator to check `URLSearchParams` size in older browsers by @wontondon
+
 ## 0.3.1
 
 ### Patch Changes
