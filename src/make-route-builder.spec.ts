@@ -204,6 +204,58 @@ describe('makeRouteBuilder', () => {
         });
       });
     });
+
+    describe('when path has normal and catch-all params', () => {
+      it('creates a builder that replaces the path params with their value', () => {
+        const builder = makeRouteBuilder(
+          '/organization/[orgId]/c/[...catch_all]',
+          {
+            params: z.object({
+              orgId: z.string(),
+              catch_all: z.array(z.string()),
+            }),
+          },
+        );
+
+        // @ts-expect-error no searchParams validation was defined
+        builder({ catch_all: ['channels'], search: {} });
+
+        expect(
+          builder({ catch_all: ['channels', 'channel_123'], orgId: 'org_123' }),
+        ).toBe('/organization/org_123/c/channels/channel_123');
+
+        expect(builder.getSchemas()).toEqual({
+          params: expect.any(Object),
+          search: undefined,
+        });
+      });
+    });
+  });
+
+  describe('when path has normal and optional catch-all params', () => {
+    it('creates a builder that replaces the path params with their value', () => {
+      const builder = makeRouteBuilder(
+        '/organization/[orgId]/c/[[...catch_all]]',
+        {
+          params: z.object({
+            orgId: z.string(),
+            catch_all: z.array(z.string()).default([]),
+          }),
+        },
+      );
+
+      // @ts-expect-error no searchParams validation was defined
+      builder({ catch_all: ['channels'], search: {} });
+
+      expect(
+        builder({ catch_all: ['channels', 'channel_123'], orgId: 'org_123' }),
+      ).toBe('/organization/org_123/c/channels/channel_123');
+
+      expect(builder.getSchemas()).toEqual({
+        params: expect.any(Object),
+        search: undefined,
+      });
+    });
   });
 
   describe('for a path with route params and searchParams', () => {
