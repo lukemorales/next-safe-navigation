@@ -149,11 +149,12 @@ describe('createNavigationConfig', () => {
       describe('when path has multiple route params', () => {
         const { routes } = createNavigationConfig((defineRoute) => ({
           organizationUser: defineRoute(
-            '/organizations/[orgId]/users/[userId]',
+            '/organizations/[orgId]/users/[userId]/[[...catch_all]]',
             {
               params: z.object({
                 orgId: z.string(),
                 userId: z.string(),
+                catch_all: z.array(z.string()).default([])
               }),
             },
           ),
@@ -168,8 +169,8 @@ describe('createNavigationConfig', () => {
           });
 
           expect(
-            routes.organizationUser({ orgId: 'org_123', userId: 'user_123' }),
-          ).toBe('/organizations/org_123/users/user_123');
+            routes.organizationUser({ orgId: 'org_123', userId: 'user_123', catch_all: ['channel_123'] }),
+          ).toBe('/organizations/org_123/users/user_123/channel_123');
         });
 
         it('exposes method to validate only params', () => {
