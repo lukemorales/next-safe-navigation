@@ -154,7 +154,7 @@ describe('createNavigationConfig', () => {
               params: z.object({
                 orgId: z.string(),
                 userId: z.string(),
-                catch_all: z.array(z.string()).default([])
+                catch_all: z.array(z.string()).default([]),
               }),
             },
           ),
@@ -169,7 +169,11 @@ describe('createNavigationConfig', () => {
           });
 
           expect(
-            routes.organizationUser({ orgId: 'org_123', userId: 'user_123', catch_all: ['channel_123'] }),
+            routes.organizationUser({
+              orgId: 'org_123',
+              userId: 'user_123',
+              catch_all: ['channel_123'],
+            }),
           ).toBe('/organizations/org_123/users/user_123/channel_123');
         });
 
