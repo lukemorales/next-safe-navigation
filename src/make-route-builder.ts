@@ -22,9 +22,9 @@ type Suffix = `?${string}`;
 type SafePath<Path extends string> = string extends Route ? Path : Route<Path>;
 
 type ExtractPathParams<T extends string> =
-  T extends `${string}[[...${infer Param}]]${infer Rest}` ?
+  T extends `${infer Rest}[[...${infer Param}]]` ?
     Param | ExtractPathParams<Rest>
-  : T extends `${string}[...${infer Param}]${infer Rest}` ?
+  : T extends `${infer Rest}[...${infer Param}]` ?
     Param | ExtractPathParams<Rest>
   : T extends `${string}[${infer Param}]${infer Rest}` ?
     Param | ExtractPathParams<Rest>
