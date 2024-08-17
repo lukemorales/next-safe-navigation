@@ -1,5 +1,11 @@
 # next-safe-navigation
 
+## 0.3.3
+
+### Patch Changes
+
+- [#25](https://github.com/lukemorales/next-safe-navigation/pull/25) [`711f5f6`](https://github.com/lukemorales/next-safe-navigation/commit/711f5f6b85d1fcb4147901523226cc8cac1e6a5f) Thanks [@Katona](https://github.com/Katona)! - Fix `catch-all` params can't be mixed with other params
+
 ## 0.3.2
 
 ### Patch Changes
