@@ -3,8 +3,9 @@ import {
   useSearchParams as useNextSearchParams,
 } from 'next/navigation';
 
-import { type z } from 'zod';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
+import { validateStandardSchemaSync } from './standard-schema';
 import { convertURLSearchParamsToObject } from './convert-url-search-params-to-object';
 import { makeRouteBuilder, type RouteBuilder } from './make-route-builder';
 import type { Prettify } from './types';
@@ -19,69 +20,87 @@ type NavigationConfig = Record<string, AnyRouteBuilder>;
 
 type SafeRootRoute<Path extends string> = () => Path;
 
-type SafeRouteWithParams<Path extends string, Params extends z.ZodSchema> = {
-  (options: z.input<Params>): Path;
-  $parseParams: (params: unknown) => z.output<Params>;
+type SafeRouteWithParams<
+  Path extends string,
+  Params extends StandardSchemaV1,
+> = {
+  (options: StandardSchemaV1.InferInput<Params>): Path;
+  $parseParams: (params: unknown) => StandardSchemaV1.InferOutput<Params>;
 };
 
-type SafeRouteWithSearch<Path extends string, Search extends z.ZodSchema> = {
-  (options?: { search?: z.input<Search> }): Path;
-  $parseSearchParams: (searchParams: unknown) => z.output<Search>;
+type SafeRouteWithSearch<
+  Path extends string,
+  Search extends StandardSchemaV1,
+> = {
+  (options?: { search?: StandardSchemaV1.InferInput<Search> }): Path;
+  $parseSearchParams: (
+    searchParams: unknown,
+  ) => StandardSchemaV1.InferOutput<Search>;
 };
 
 type SafeRouteWithRequiredSearch<
   Path extends string,
-  Search extends z.ZodSchema,
+  Search extends StandardSchemaV1,
 > = {
-  (options: { search: z.input<Search> }): Path;
-  $parseSearchParams: (searchParams: unknown) => z.output<Search>;
+  (options: { search: StandardSchemaV1.InferInput<Search> }): Path;
+  $parseSearchParams: (
+    searchParams: unknown,
+  ) => StandardSchemaV1.InferOutput<Search>;
 };
 
 type SafeRouteWithParamsAndSearch<
   Path extends string,
-  Params extends z.ZodSchema,
-  Search extends z.ZodSchema,
-  Options = z.input<Params> & { search?: z.input<Search> },
+  Params extends StandardSchemaV1,
+  Search extends StandardSchemaV1,
+  Options = StandardSchemaV1.InferInput<Params> & {
+    search?: StandardSchemaV1.InferInput<Search>;
+  },
 > = {
   (options: Prettify<Options>): Path;
-  $parseParams: (params: unknown) => z.output<Params>;
-  $parseSearchParams: (searchParams: unknown) => z.output<Search>;
+  $parseParams: (params: unknown) => StandardSchemaV1.InferOutput<Params>;
+  $parseSearchParams: (
+    searchParams: unknown,
+  ) => StandardSchemaV1.InferOutput<Search>;
 };
 
 type SafeRouteWithParamsAndRequiredSearch<
   Path extends string,
-  Params extends z.ZodSchema,
-  Search extends z.ZodSchema,
-  Options = z.input<Params> & { search: z.input<Search> },
+  Params extends StandardSchemaV1,
+  Search extends StandardSchemaV1,
+  Options = StandardSchemaV1.InferInput<Params> & {
+    search: StandardSchemaV1.InferInput<Search>;
+  },
 > = {
   (options: Prettify<Options>): Path;
-  $parseParams: (params: unknown) => z.output<Params>;
-  $parseSearchParams: (searchParams: unknown) => z.output<Search>;
+  $parseParams: (params: unknown) => StandardSchemaV1.InferOutput<Params>;
+  $parseSearchParams: (
+    searchParams: unknown,
+  ) => StandardSchemaV1.InferOutput<Search>;
 };
 
 type SafeRoute<
   Path extends string,
-  Params extends z.ZodSchema,
-  Search extends z.ZodSchema,
+  Params extends StandardSchemaV1,
+  Search extends StandardSchemaV1,
 > =
   [Params, Search] extends [never, never] ? SafeRootRoute<Path>
-  : [Params, Search] extends [z.ZodSchema, never] ?
+  : [Params, Search] extends [StandardSchemaV1, never] ?
     SafeRouteWithParams<Path, Params>
-  : [Params, Search] extends [never, z.ZodSchema] ?
-    undefined extends z.input<Search> ?
+  : [Params, Search] extends [never, StandardSchemaV1] ?
+    undefined extends StandardSchemaV1.InferInput<Search> ?
       SafeRouteWithSearch<Path, Search>
     : SafeRouteWithRequiredSearch<Path, Search>
-  : [Params, Search] extends [z.ZodSchema, z.ZodSchema] ?
-    undefined extends z.input<Search> ?
+  : [Params, Search] extends [StandardSchemaV1, StandardSchemaV1] ?
+    undefined extends StandardSchemaV1.InferInput<Search> ?
       SafeRouteWithParamsAndSearch<Path, Params, Search>
     : SafeRouteWithParamsAndRequiredSearch<Path, Params, Search>
   : never;
 
 type RouteWithParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
-    RouteBuilder<string, infer Params extends z.ZodSchema, infer _>
+    RouteBuilder<string, infer Params extends StandardSchemaV1, infer _>
   ) ?
-    Params extends z.ZodSchema ?
+    Params extends StandardSchemaV1 ?
       Route
     : never
   : never;
@@ -91,11 +110,11 @@ type RouteWithSearchParams<Config extends NavigationConfig> = {
   [Route in keyof Config & string]: Config[Route] extends (
     RouteBuilder<
       string,
-      infer _ extends z.ZodSchema,
-      infer Search extends z.ZodSchema
+      infer _ extends StandardSchemaV1,
+      infer Search extends StandardSchemaV1
     >
   ) ?
-    Search extends z.ZodSchema ?
+    Search extends StandardSchemaV1 ?
       Route
     : never
   : never;
@@ -105,8 +124,8 @@ type SafeNavigation<Config extends NavigationConfig> = {
   [Route in keyof Config]: Config[Route] extends (
     RouteBuilder<
       infer Path extends string,
-      infer Params extends z.ZodSchema,
-      infer Search extends z.ZodSchema
+      infer Params extends StandardSchemaV1,
+      infer Search extends StandardSchemaV1
     >
   ) ?
     SafeRoute<Path, Params, Search>
@@ -121,10 +140,10 @@ type ValidatedRouteParams<
 > =
   Route extends keyof Pick<Router, AcceptableRoute & keyof Router> ?
     Router[Route] extends (
-      | SafeRoute<string, infer Params extends z.ZodSchema, any>
-      | SafeRoute<string, infer Params extends z.ZodSchema, never>
+      | SafeRoute<string, infer Params extends StandardSchemaV1, any>
+      | SafeRoute<string, infer Params extends StandardSchemaV1, never>
     ) ?
-      z.output<Params>
+      StandardSchemaV1.InferOutput<Params>
     : never
   : never;
 
@@ -136,10 +155,10 @@ type ValidatedRouteSearchParams<
 > =
   Route extends keyof Pick<Router, AcceptableRoute & keyof Router> ?
     Router[Route] extends (
-      | SafeRoute<string, any, infer Search extends z.ZodSchema>
-      | SafeRoute<string, never, infer Search extends z.ZodSchema>
+      | SafeRoute<string, any, infer Search extends StandardSchemaV1>
+      | SafeRoute<string, never, infer Search extends StandardSchemaV1>
     ) ?
-      z.output<Search>
+      StandardSchemaV1.InferOutput<Search>
     : never
   : never;
 
@@ -168,7 +187,7 @@ export function createNavigationConfig<Config extends NavigationConfig>(
 
   const schemasStore = new Map<
     keyof Config,
-    Partial<Record<'params' | 'search', z.ZodSchema>>
+    Partial<Record<'params' | 'search', StandardSchemaV1>>
   >();
 
   for (const [route, builder] of Object.entries(navigationConfig)) {
@@ -182,74 +201,80 @@ export function createNavigationConfig<Config extends NavigationConfig>(
     }
 
     if (schemas.params) {
-      const paramsSchema = schemas.params as z.ZodSchema;
+      const paramsSchema = schemas.params as StandardSchemaV1;
 
       (builder as any).$parseParams = (input: unknown) => {
-        const validation = paramsSchema.safeParse(input);
-
-        if (!validation.success) {
+        try {
+          return validateStandardSchemaSync(paramsSchema, input);
+        } catch (error) {
           throw new Error(
-            `Invalid route params for route "${route}": ${validation.error.message}`,
+            `Invalid route params for route "${route}": ${error instanceof Error ? error.message : 'Validation failed'}`,
           );
         }
-
-        return validation.data;
       };
     }
 
     if (schemas.search) {
-      const searchSchema = schemas.search as z.ZodSchema;
+      const searchSchema = schemas.search as StandardSchemaV1;
 
       (builder as any).$parseSearchParams = (input: unknown) => {
-        const validation = searchSchema.safeParse(input);
-
-        if (!validation.success) {
+        try {
+          return validateStandardSchemaSync(searchSchema, input);
+        } catch (error) {
           throw new Error(
-            `Invalid search params for route "${route}": ${validation.error.message}`,
+            `Invalid search params for route "${route}": ${error instanceof Error ? error.message : 'Validation failed'}`,
           );
         }
-
-        return validation.data;
       };
     }
   }
 
-  function useSafeParams(route: string) {
+  function useSafeParams<Route extends keyof SafeNavigation<Config> & string>(
+    route: Extract<RouteWithParams<Config>, Route>,
+  ): ValidatedRouteParams<Config, Route, RouteWithParams<Config>> {
     const schema = schemasStore.get(route);
 
     if (!schema?.params) {
       throw new Error(`Route "${route}" does not have params validation`);
     }
 
-    const validation = schema.params.safeParse(useNextParams());
-
-    if (!validation.success) {
+    try {
+      return validateStandardSchemaSync(
+        schema.params,
+        useNextParams(),
+      ) as ValidatedRouteParams<Config, Route, RouteWithParams<Config>>;
+    } catch (error) {
       throw new Error(
-        `Invalid route params for route "${route}": ${validation.error.message}`,
+        `Invalid route params for route "${route}": ${error instanceof Error ? error.message : 'Validation failed'}`,
       );
     }
-
-    return validation.data;
   }
 
-  function useSafeSearchParams(route: string) {
+  function useSafeSearchParams<
+    Route extends keyof SafeNavigation<Config> & string,
+  >(
+    route: Extract<RouteWithSearchParams<Config>, Route>,
+  ): ValidatedRouteSearchParams<Config, Route, RouteWithSearchParams<Config>> {
     const schema = schemasStore.get(route);
 
     if (!schema?.search) {
       throw new Error(`Route "${route}" does not have searchParams validation`);
     }
 
-    const validation = schema.search.safeParse(
-      convertURLSearchParamsToObject(useNextSearchParams()),
-    );
-
-    if (!validation.success) {
+    try {
+      return validateStandardSchemaSync(
+        schema.search,
+        convertURLSearchParamsToObject(useNextSearchParams()),
+      ) as ValidatedRouteSearchParams<
+        Config,
+        Route,
+        RouteWithSearchParams<Config>
+      >;
+    } catch (error) {
       throw new Error(
-        `Invalid search params for route "${route}": ${validation.error.message}`,
+        `Invalid search params for route "${route}": ${error instanceof Error ? error.message : 'Validation failed'}`,
       );
     }
-
-    return validation.data;
   }
 
   return {

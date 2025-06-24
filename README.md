@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <strong>Static type and runtime validation for navigating routes in <a href="https://nextjs.org" target="\_parent">NextJS App Router</a> with Zod schemas.</strong>
+  <strong>Static type and runtime validation for navigating routes in <a href="https://nextjs.org" target="\_parent">NextJS App Router</a> with Standard Schema support (Zod, Valibot, ArkType, etc.).</strong>
 </p>
 
 <p align="center">
@@ -25,10 +25,20 @@
 </p>
 
 ## 📦 Install
+
 Safe NextJS Navigation is available as a package on NPM, install with your favorite package manager:
 
 ```dircolors
 npm install next-safe-navigation
+```
+
+You'll also need to install a Standard Schema compatible validation library:
+
+```dircolors
+# Choose one:
+npm install zod           # Zod (most popular)
+npm install valibot       # Valibot (lightweight)
+npm install arktype       # ArkType (fast)
 ```
 
 ## ⚡ Quick start
@@ -37,13 +47,14 @@ npm install next-safe-navigation
 > Enable `experimental.typedRoutes` in `next.config.js` for a better and safer experience with autocomplete when defining your routes
 
 ### Declare your application routes and parameters in a single place
+
 ```ts
 // src/shared/navigation.ts
-import { createNavigationConfig } from "next-safe-navigation";
-import { z } from "zod";
+import { createNavigationConfig } from 'next-safe-navigation';
+import { z } from 'zod';
 
-export const { routes, useSafeParams, useSafeSearchParams } = createNavigationConfig(
-  (defineRoute) => ({
+export const { routes, useSafeParams, useSafeSearchParams } =
+  createNavigationConfig((defineRoute) => ({
     home: defineRoute('/'),
     customers: defineRoute('/customers', {
       search: z
@@ -70,19 +81,21 @@ export const { routes, useSafeParams, useSafeSearchParams } = createNavigationCo
         slug: z.array(z.string()).optional(),
       }),
     }),
-  }),
-);
+  }));
 ```
 
 ### Runtime validation for React Server Components (RSC)
+
 > [!IMPORTANT]
-> The output of a Zod schema might not be the same as its input, since schemas can transform the values during parsing (e.g.: `z.coerce.number()`), especially when dealing with `URLSearchParams` where all values are strings and you might want to convert params to different types. For this reason, this package does not expose types to infer `params` or `searchParams` from your declared routes to be used in page props:
+> The output of a schema might not be the same as its input, since schemas can transform the values during parsing (e.g.: string to number coercion), especially when dealing with `URLSearchParams` where all values are strings and you might want to convert params to different types. For this reason, this package does not expose types to infer `params` or `searchParams` from your declared routes to be used in page props:
+>
 > ```ts
 > interface CustomersPageProps {
 >   // ❌ Do not declare your params | searchParam types
->   searchParams?: ReturnType<typeof routes.customers.$parseSearchParams>
+>   searchParams?: ReturnType<typeof routes.customers.$parseSearchParams>;
 > }
->```
+> ```
+>
 > Instead, it is strongly advised that you parse the params in your server components to have runtime validated and accurate type information for the values in your app.
 
 ```ts
@@ -132,6 +145,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 ```
 
 ### Runtime validation for Client Components
+
 ```ts
 // src/app/customers/page.tsx
 'use client';
@@ -205,4 +219,82 @@ export function CustomerInvoices({ invoices }) {
     </ul>
   )
 };
+```
+
+## 🔄 Standard Schema Support
+
+This library now supports [Standard Schema](https://github.com/standard-schema/standard-schema), which means you can use any compatible validation library:
+
+### Using Zod
+
+```ts
+// src/shared/navigation.ts
+import { createNavigationConfig } from 'next-safe-navigation';
+import { z } from 'zod';
+
+export const { routes, useSafeParams, useSafeSearchParams } =
+  createNavigationConfig((defineRoute) => ({
+    customers: defineRoute('/customers', {
+      search: z
+        .object({
+          query: z.string().default(''),
+          page: z.coerce.number().default(1),
+        })
+        .default({ query: '', page: 1 }),
+    }),
+    invoice: defineRoute('/invoices/[invoiceId]', {
+      params: z.object({
+        invoiceId: z.string(),
+      }),
+    }),
+  }));
+```
+
+### Using Valibot
+
+```ts
+// src/shared/navigation.ts
+import { createNavigationConfig } from 'next-safe-navigation';
+import * as v from 'valibot';
+
+export const { routes, useSafeParams, useSafeSearchParams } =
+  createNavigationConfig((defineRoute) => ({
+    customers: defineRoute('/customers', {
+      search: v.objectWithRest(
+        {
+          query: v.optional(v.string(), ''),
+          page: v.optional(v.pipe(v.string(), v.transform(Number)), 1),
+        },
+        v.never(),
+      ),
+    }),
+    invoice: defineRoute('/invoices/[invoiceId]', {
+      params: v.object({
+        invoiceId: v.string(),
+      }),
+    }),
+  }));
+```
+
+### Using ArkType
+
+```ts
+// src/shared/navigation.ts
+import { createNavigationConfig } from 'next-safe-navigation';
+import { type } from 'arktype';
+
+export const { routes, useSafeParams, useSafeSearchParams } =
+  createNavigationConfig((defineRoute) => ({
+    customers: defineRoute('/customers', {
+      search: type({
+        'query?': "string = ''",
+        'page?': 'string.numeric.parse = 1',
+      }),
+    }),
+    invoice: defineRoute('/invoices/[invoiceId]', {
+      params: type({
+        invoiceId: 'string',
+      }),
+    }),
+  }));
 ```

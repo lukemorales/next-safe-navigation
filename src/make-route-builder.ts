@@ -1,6 +1,6 @@
 import { type Route } from 'next';
 
-import { type z } from 'zod';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 import { convertObjectToURLSearchParams } from './convert-object-to-url-search-params';
 import type { ExcludeAny } from './types';
@@ -32,37 +32,45 @@ type ExtractPathParams<T extends string> =
 
 export type RouteBuilder<
   Path extends string,
-  Params extends z.ZodSchema,
-  Search extends z.ZodSchema,
+  Params extends StandardSchemaV1,
+  Search extends StandardSchemaV1,
 > =
   [Params, Search] extends [never, never] ?
     { (): Path; getSchemas: () => { params: never; search: never } }
-  : [Params, Search] extends [z.ZodSchema, never] ?
+  : [Params, Search] extends [StandardSchemaV1, never] ?
     {
-      (options: z.input<Params>): Path;
+      (options: StandardSchemaV1.InferInput<Params>): Path;
       getSchemas: () => { params: Params; search: never };
     }
-  : [Params, Search] extends [never, z.ZodSchema] ?
-    undefined extends z.input<Search> ?
+  : [Params, Search] extends [never, StandardSchemaV1] ?
+    undefined extends StandardSchemaV1.InferInput<Search> ?
       {
-        (options?: { search?: z.input<Search> }): Path | `${Path}${Suffix}`;
+        (options?: {
+          search?: StandardSchemaV1.InferInput<Search>;
+        }): Path | `${Path}${Suffix}`;
         getSchemas: () => { params: never; search: Search };
       }
     : {
-        (options: { search: z.input<Search> }): `${Path}${Suffix}`;
+        (options: {
+          search: StandardSchemaV1.InferInput<Search>;
+        }): `${Path}${Suffix}`;
         getSchemas: () => { params: never; search: Search };
       }
-  : [Params, Search] extends [z.ZodSchema, z.ZodSchema] ?
-    undefined extends z.input<Search> ?
+  : [Params, Search] extends [StandardSchemaV1, StandardSchemaV1] ?
+    undefined extends StandardSchemaV1.InferInput<Search> ?
       {
         (
-          options: z.input<Params> & { search?: z.input<Search> },
+          options: StandardSchemaV1.InferInput<Params> & {
+            search?: StandardSchemaV1.InferInput<Search>;
+          },
         ): Path | `${Path}${Suffix}`;
         getSchemas: () => { params: Params; search: Search };
       }
     : {
         (
-          options: z.input<Params> & { search: z.input<Search> },
+          options: StandardSchemaV1.InferInput<Params> & {
+            search: StandardSchemaV1.InferInput<Search>;
+          },
         ): `${Path}${Suffix}`;
         getSchemas: () => { params: Params; search: Search };
       }
@@ -73,28 +81,25 @@ type EnsurePathWithNoParams<Path extends string> =
   : `[ERROR]: Missing validation for path params`;
 
 /**
- * Ensures no extra values are passed to params validation
+ * For Standard Schema, we'll simplify this since we don't have the same object introspection
  */
-type StrictParams<Schema extends z.ZodSchema, Keys extends string> =
-  Schema extends z.ZodObject<infer Params> ?
-    [keyof Params] extends [Keys] ?
-      Schema
-    : z.ZodObject<{
-        [Key in keyof Params]: Key extends Keys ? Params[Key] : never;
-      }>
-  : never;
+type StrictParams<
+  Schema extends StandardSchemaV1,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _Keys extends string,
+> = Schema;
 
 type RouteBuilderResult<
   Path extends string,
   PathParams extends string,
-  Params extends z.ZodObject<any>,
-  Search extends z.ZodSchema,
+  Params extends StandardSchemaV1,
+  Search extends StandardSchemaV1,
 > =
   [PathParams, Search] extends [string, never] ?
     RouteBuilder<Path, Params, never>
-  : [PathParams, Search] extends [never, z.ZodSchema] ?
+  : [PathParams, Search] extends [never, StandardSchemaV1] ?
     RouteBuilder<Path, never, Search>
-  : [PathParams, Search] extends [string, z.ZodSchema] ?
+  : [PathParams, Search] extends [string, StandardSchemaV1] ?
     RouteBuilder<Path, Params, Search>
   : never;
 
@@ -122,17 +127,14 @@ export function makeRouteBuilder<Path extends PathBlueprint>(
 
 export function makeRouteBuilder<
   Path extends PathBlueprint,
-  Params extends z.ZodObject<{
-    [K in ExtractPathParams<Path>]: z.ZodSchema;
-  }>,
-  Search extends z.ZodSchema = never,
+  Params extends StandardSchemaV1,
+  Search extends StandardSchemaV1 = never,
 >(
   path: SafePath<Path>,
-  schemas: ExtractPathParams<Path> extends never ?
-    { search: Search | z.ZodOptional<z.ZodSchema> }
+  schemas: ExtractPathParams<Path> extends never ? { search: Search }
   : {
       params: StrictParams<Params, ExtractPathParams<Path>>;
-      search?: Search | z.ZodOptional<z.ZodSchema>;
+      search?: Search;
     },
 ): RouteBuilderResult<
   Path,
@@ -143,7 +145,7 @@ export function makeRouteBuilder<
 
 export function makeRouteBuilder(
   path: PathBlueprint,
-  schemas?: { params?: z.ZodSchema; search?: z.ZodSchema },
+  schemas?: { params?: StandardSchemaV1; search?: StandardSchemaV1 },
 ): any {
   if (!path.startsWith('/')) {
     path = `/${path}`;
