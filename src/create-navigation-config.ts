@@ -3,10 +3,9 @@ import {
   useSearchParams as useNextSearchParams,
 } from 'next/navigation';
 
-import {
-  type StandardSchemaV1,
-  validateStandardSchemaSync,
-} from './standard-schema';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+
+import { validateStandardSchemaSync } from './standard-schema';
 import { convertURLSearchParamsToObject } from './convert-url-search-params-to-object';
 import { makeRouteBuilder, type RouteBuilder } from './make-route-builder';
 import type { Prettify } from './types';

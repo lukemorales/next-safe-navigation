@@ -1,6 +1,7 @@
 import { type Route } from 'next';
 
-import { type StandardSchemaV1 } from './standard-schema';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+
 import { convertObjectToURLSearchParams } from './convert-object-to-url-search-params';
 import type { ExcludeAny } from './types';
 

@@ -7,7 +7,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Import official Standard Schema types
-export type { StandardSchemaV1 } from '@standard-schema/spec';
 
 /**
  * Type-safe helper to validate data using any Standard Schema compliant validator
