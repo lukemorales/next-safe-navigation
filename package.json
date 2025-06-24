@@ -1,6 +1,6 @@
 {
   "name": "next-safe-navigation",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "author": "Luke Morales <lukemorales@live.com>",
   "description": "Type-safe navigation for NextJS App router with Standard Schema support (Zod, Valibot, ArkType, etc.)",
   "license": "MIT",
